@@ -1,0 +1,12 @@
+# Ignore environment files
+backend/.env
+
+# Ignore node modules
+backend/node_modules/
+
+# Optional: ignore logs
+*.log
+
+# Optional: OS / editor files
+.DS_Store
+.vscode/
