@@ -4,16 +4,28 @@ import pool from './config/db.js';
 import authRoutes from './routes/auth.routes.js';
 import accountRoutes from './routes/account.routes.js';
 import transactionRoutes from './routes/transaction.routes.js';
+import transferRoutes from './routes/transfer.routes.js';
+import transactionHistoryRoutes from './routes/transactionHistory.routes.js';
+import adminRoutes from './routes/admin.routes.js';
+import { apiLimiter } from './middlewares/rateLimit.middleware.js';
+import helmet from 'helmet';
+import { errorHandler } from './middlewares/error.middleware.js';
 
 // Load environment variables
 dotenv.config();
 const app = express();
 
+app.use(helmet());
+app.use(errorHandler);
 // Middleware
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/transfers', transferRoutes);
+app.use('/api/transactions-history', transactionHistoryRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/', apiLimiter);
 
 // DB connection test
 (async () => {

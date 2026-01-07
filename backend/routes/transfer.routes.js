@@ -1,14 +1,10 @@
 import express from 'express';
-import {
-    deposit,
-    withdraw
-} from '../controllers/transaction.controller.js';
+import { transfer } from '../controllers/transfer.controller.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import { validateAmount } from '../middlewares/validate.middleware.js';
 
 const router = express.Router();
 
-router.post('/deposit', authenticate, validateAmount, deposit);
-router.post('/withdraw', authenticate, validateAmount, withdraw);
+router.post('/transfer', authenticate, validateAmount, transfer);
 
 export default router;
