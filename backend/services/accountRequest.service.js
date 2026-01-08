@@ -1,0 +1,27 @@
+import pool from '../config/db.js';
+
+export const createAccountRequestService = async (userId, accountType, kycData) => {
+    const [existing] = await pool.query(
+        `SELECT id FROM account_requests WHERE user_id = ?`,
+        [userId]
+    );
+
+    if (existing.length > 0) {
+        throw new Error('Account request already exists');
+    }
+
+    await pool.query(
+        `INSERT INTO account_requests (user_id, account_type, submitted_data)
+         VALUES (?, ?, ?)`,
+        [userId, accountType, JSON.stringify(kycData)]
+    );
+};
+
+export const getRequestStatusService = async (userId) => {
+    const [rows] = await pool.query(
+        `SELECT status FROM account_requests WHERE user_id = ?`,
+        [userId]
+    );
+
+    return rows.length ? rows[0] : { status: 'no_request' };
+};

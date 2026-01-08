@@ -1,4 +1,8 @@
 import pool from '../config/db.js';
+import { getTotalAmountLast24Hours } 
+from './transactionLimit.service.js';
+
+const LIMIT = 100000;
 
 export const transferService = async (
     userId,
@@ -53,6 +57,35 @@ export const transferService = async (
 
         if (toAccounts[0].status !== 'active') {
             throw new Error('Receiver account is not active');
+        }
+        // If amount exceeds 100,000, create a transfer request for admin approval
+        if (amount > LIMIT) {
+        await pool.query(
+            `INSERT INTO transaction_requests
+             (account_id, user_id, transaction_type, amount, to_account_id)
+             VALUES (?, ?, 'transfer', ?, ?)`,
+            [fromAccountId, userId, amount, toAccountId]
+        );
+
+        return {
+            message: 'Transfer request sent for admin approval'
+        };
+    }
+
+    //let's check 24 hour limit for transfers
+    const totalLast24h =
+        await getTotalAmountLast24Hours(fromAccountId, 'transfer');
+        if (totalLast24h + amount > LIMIT) {
+            await pool.query(
+            `INSERT INTO transaction_requests
+             (account_id, user_id, transaction_type, amount, to_account_id)
+             VALUES (?, ?, 'transfer', ?, ?)`,
+            [fromAccountId, userId, amount, toAccountId]
+        );
+
+        return {
+            message: 'Transfer request sent for admin approval'
+        };
         }
 
         // 3️⃣ Debit sender

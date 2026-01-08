@@ -1,25 +1,24 @@
 import pool from '../config/db.js';
-import { generateAccountNumber } from '../utils/accountNumber.js';
 
-export const createAccountService = async (userId, accountType) => {
-    if (!accountType) {
-        throw new Error('Account type is required');
-    }
+// export const createAccountService = async (userId, accountType) => {
+//     if (!accountType) {
+//         throw new Error('Account type is required');
+//     }
 
-    const accountNumber = generateAccountNumber();
+//     const accountNumber = generateAccountNumber();
 
-    const [result] = await pool.query(
-        `INSERT INTO accounts (user_id, account_number, account_type)
-         VALUES (?, ?, ?)`,
-        [userId, accountNumber, accountType]
-    );
+//     const [result] = await pool.query(
+//         `INSERT INTO accounts (user_id, account_number, account_type)
+//          VALUES (?, ?, ?)`,
+//         [userId, accountNumber, accountType]
+//     );
 
-    return {
-        account_id: result.insertId,
-        account_number: accountNumber,
-        account_type: accountType
-    };
-};
+//     return {
+//         account_id: result.insertId,
+//         account_number: accountNumber,
+//         account_type: accountType
+//     };
+// };
 
 export const getAccountsService = async (userId) => {
     const [accounts] = await pool.query(

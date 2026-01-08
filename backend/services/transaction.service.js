@@ -1,4 +1,8 @@
 import pool from '../config/db.js';
+import { getTotalAmountLast24Hours } 
+from './transactionLimit.service.js';
+
+const LIMIT = 100000;
 
 export const depositService = async (userId, accountId, amount) => {
     if (!amount || amount <= 0) {
@@ -26,6 +30,36 @@ export const depositService = async (userId, accountId, amount) => {
             throw new Error('Account is not active');
         }
 
+    // If amount exceeds 100,000, create a transaction request for admin approval
+    if (amount > LIMIT) {
+        await pool.query(
+            `INSERT INTO transaction_requests
+             (account_id, user_id, transaction_type, amount)
+             VALUES (?, ?, 'deposit', ?)`,
+            [accountId, userId, amount]
+        );
+
+        return {
+            message: 'Deposit request sent for admin approval'
+        };
+    }
+
+    // 2 Rolling 24-hour rule
+    const totalLast24h =
+        await getTotalAmountLast24Hours(accountId, 'deposit');
+        if (totalLast24h + amount > LIMIT) {
+            await pool.query(
+            `INSERT INTO transaction_requests
+             (account_id, user_id, transaction_type, amount)
+             VALUES (?, ?, 'deposit', ?)`,
+            [accountId, userId, amount]
+        );
+
+        return {
+            message: 'Deposit request sent for admin approval'
+        };
+        }
+
         // Update balance
         await connection.query(
             `UPDATE accounts 
@@ -33,6 +67,7 @@ export const depositService = async (userId, accountId, amount) => {
              WHERE id = ?`,
             [amount, accountId]
         );
+
 
         // Insert transaction record
         await connection.query(
@@ -80,6 +115,35 @@ export const withdrawService = async (userId, accountId, amount) => {
 
         if (accounts[0].balance < amount) {
             throw new Error('Insufficient balance');
+        }
+    // If amount exceeds 100,000, create a transaction request for admin approval
+         if (amount > LIMIT) {
+        await pool.query(
+            `INSERT INTO transaction_requests
+             (account_id, user_id, transaction_type, amount)
+             VALUES (?, ?, 'withdraw', ?)`,
+            [accountId, userId, amount]
+        );
+
+        return {
+            message: 'Withdrawal request sent for admin approval'
+        };
+    }
+
+    //last 24-hour rule
+    const totalLast24h =
+        await getTotalAmountLast24Hours(accountId, 'withdraw');
+        if (totalLast24h + amount > LIMIT) {
+            await pool.query(
+            `INSERT INTO transaction_requests
+             (account_id, user_id, transaction_type, amount)
+             VALUES (?, ?, 'withdraw', ?)`,
+            [accountId, userId, amount]
+        );
+
+        return {
+            message: 'Withdrawal request sent for admin approval'
+        };
         }
 
         // Deduct balance
