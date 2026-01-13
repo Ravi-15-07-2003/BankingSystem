@@ -1,8 +1,15 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
+import { isValidEmail } from '../utils/emailValidators.js';
 
 export const registerUser = async ({ full_name, email, password }) => {
+
+    // ✅ Email format validation
+        if (!isValidEmail(email)) {
+             throw new Error('Email Invalid');
+            };
+
     if (!full_name || !email || !password) {
         throw new Error('All fields are required');
     }

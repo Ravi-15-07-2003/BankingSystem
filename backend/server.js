@@ -10,6 +10,7 @@ import adminRoutes from './routes/admin.routes.js';
 import { apiLimiter } from './middlewares/rateLimit.middleware.js';
 import helmet from 'helmet';
 import { errorHandler } from './middlewares/error.middleware.js';
+import userRoutes from './routes/user.routes.js';
 
 // Load environment variables
 dotenv.config();
@@ -26,6 +27,7 @@ app.use('/api/transfers', transferRoutes);
 app.use('/api/transactions-history', transactionHistoryRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/', apiLimiter);
+app.use('/api/users', userRoutes);
 
 // DB connection test
 (async () => {

@@ -32,6 +32,10 @@ export const approveRequestService = async (requestId) => {
         //     `DELETE FROM account_requests WHERE id = ?`,
         //     [requestId]
         // );
+        await conn.query(
+            `UPDATE account_requests SET status = 'approved' WHERE id = ?`,
+            [requestId]
+        );
 
         await conn.commit();
     } catch (err) {

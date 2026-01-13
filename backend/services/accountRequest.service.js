@@ -1,6 +1,7 @@
 import pool from '../config/db.js';
 
-export const createAccountRequestService = async (userId, accountType, kycData) => {
+export const createAccountRequestService = async (userId, accountType, submitted_data
+, kycDocuments) => {
     const [existing] = await pool.query(
         `SELECT id FROM account_requests WHERE user_id = ?`,
         [userId]
@@ -11,9 +12,9 @@ export const createAccountRequestService = async (userId, accountType, kycData) 
     }
 
     await pool.query(
-        `INSERT INTO account_requests (user_id, account_type, submitted_data)
-         VALUES (?, ?, ?)`,
-        [userId, accountType, JSON.stringify(kycData)]
+        `INSERT INTO account_requests (user_id, account_type, submitted_data, kyc_documents)
+         VALUES (?, ?, ?, ?)`,
+        [userId, accountType, JSON.stringify(submitted_data), JSON.stringify(kycDocuments)]
     );
 };
 
