@@ -11,13 +11,15 @@ import { apiLimiter } from './middlewares/rateLimit.middleware.js';
 import helmet from 'helmet';
 import { errorHandler } from './middlewares/error.middleware.js';
 import userRoutes from './routes/user.routes.js';
-
+import cookieParser from 'cookie-parser';
 // Load environment variables
 dotenv.config();
 const app = express();
 
 app.use(helmet());
 app.use(errorHandler);
+app.use(cookieParser());
+
 // Middleware
 app.use(express.json());
 app.use('/api/auth', authRoutes);

@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 import { isValidEmail } from '../utils/emailValidators.js';
+import { generateAccessToken, generateRefreshToken } from '../utils/token.js';
 
 export const registerUser = async ({ full_name, email, password }) => {
 
@@ -59,14 +59,23 @@ export const loginUser = async ({ email, password }) => {
         throw new Error('Invalid credentials');
     }
 
-    const token = jwt.sign(
-        { userId: user.id, role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRES_IN }
-    );
+    const payload = {
+            userId: user.id,
+            role: user.role
+        };
+
+     const accessToken = generateAccessToken(payload);
+     const refreshToken = generateRefreshToken(payload);
+
+     // ✅ Store refresh token in DB
+        await pool.query(
+            `UPDATE users SET refresh_token = ? WHERE id = ?`,
+            [refreshToken, user.id]
+        );
 
     return {
         message: 'Login successful',
-        token
+        accessToken,
+        refreshToken
     };
 };
